@@ -1,0 +1,24 @@
+# 빌드/의존성 산출물
+.next
+node_modules
+out
+build
+next-env.d.ts
+package-lock.json
+
+# 생성 파일 (Supabase MCP로 재생성, 수동 편집 금지)
+lib/supabase/database.types.ts
+
+# 적용된 마이그레이션은 수정하지 않음
+supabase/migrations
+
+# 외부 도구 데이터 / Claude 설정 문서
+shrimp_data
+.claude
+
+# 문서 (코드 예시와 frontmatter가 재포맷되는 것을 방지)
+docs
+*.md
+
+# MCP 도구가 자체 형식으로 다시 쓰는 설정 파일
+.mcp.json
