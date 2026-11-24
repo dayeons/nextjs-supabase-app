@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 같은 브랜치의 이전 실행은 취소해 중복 실행을 줄입니다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: 타입체크 / 린트 / 포맷
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # CI에서는 husky 훅을 설치하지 않습니다.
+      HUSKY: 0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # typecheck -> lint -> format:check
+      - run: npm run check-all
