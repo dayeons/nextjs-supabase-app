@@ -5,12 +5,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 명령어
 
 ```bash
-npm run dev     # 개발 서버
-npm run build   # 프로덕션 빌드
-npm run lint    # ESLint (eslint .)
+npm run dev           # 개발 서버
+npm run build         # 프로덕션 빌드
+npm run lint          # ESLint (eslint .)
+npm run lint:fix      # ESLint 자동 수정
+npm run typecheck     # tsc --noEmit
+npm run format        # Prettier 적용
+npm run format:check  # Prettier 검사만
+npm run check-all     # typecheck + lint + format:check (작업 완료 전 실행)
 ```
 
 테스트 러너는 설정되어 있지 않습니다.
+
+### 코드 품질 도구
+- **ESLint**: `eslint.config.mjs` (flat config, `eslint-config-next` 16 + `eslint-config-prettier`). `.next/**`, `lib/supabase/database.types.ts`는 제외 대상입니다.
+- **Prettier**: `.prettierrc`. 가이드 문서가 아니라 **현재 코드 스타일 기준**(세미콜론, 큰따옴표, 후행 쉼표 all, 2칸, 80자)이며 `prettier-plugin-tailwindcss`가 `cn`/`cva` 안의 클래스도 정렬합니다. 마크다운, `docs/`, `.claude/`, `supabase/migrations/`, `.mcp.json`, `database.types.ts`는 `.prettierignore`로 제외됩니다.
+- **pre-commit** (Husky): `lint-staged`(스테이징된 파일에 `eslint --fix` + `prettier --write`) 후 `npm run typecheck`를 실행하며, 실패하면 커밋이 차단됩니다. 훅을 우회(`--no-verify`)하지 마세요.
+- **Claude Code 훅** (`.claude/settings.json`): Write/Edit 직후 `.claude/hooks/format-on-edit.sh`가 해당 파일에 Prettier와 `eslint --fix`를 적용합니다. 자동 수정이 불가능한 ESLint 에러는 Claude에게 전달되니 바로 고치세요.
+- **CI** (`.github/workflows/ci.yml`): push/PR 시 `npm run check-all`을 실행합니다.
+- `react-hooks/set-state-in-effect`처럼 의도된 패턴에만 `eslint-disable-next-line`을 사유 주석과 함께 사용하세요(예: `components/theme-switcher.tsx`).
 
 환경변수(`.env.local`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (anon key가 아닌 publishable key 사용).
 
@@ -39,7 +52,7 @@ Supabase 공식 Next.js 스타터(Create Next App 기반) 위에 구축된 App R
 
 ## 프로젝트 도구
 - `.mcp.json`: supabase, playwright, context7, sequential-thinking, shadcn, shrimp-task-manager MCP 설정.
-- `.claude/`에 커스텀 에이전트, `docs`/`git` 슬래시 커맨드, 알림/종료 훅이 있습니다.
+- `.claude/`에 커스텀 에이전트, `docs`/`git` 슬래시 커맨드, 자동 포맷 훅(`settings.json`에 등록됨)이 있습니다. `hooks/notification-hook.sh`, `hooks/stop-hook.sh`(Slack 알림)는 스크립트만 있고 어떤 settings에도 연결되어 있지 않으며, `.env`의 `SLACK_WEBHOOK_URL`이 필요합니다.
 - `docs/guides/`에 컴포넌트 패턴, react-hook-form, Next.js 15, 스타일링 가이드가 있습니다 (참고 시 실제 코드 구조와 대조할 것).
 
 ## 언어 규칙
